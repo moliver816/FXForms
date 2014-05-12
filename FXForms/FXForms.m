@@ -1805,6 +1805,7 @@ static BOOL *FXFormSetValueForKey(id<FXForm> form, id value, NSString *key)
     self.textField.font = [UIFont systemFontOfSize:self.textLabel.font.pointSize];
     self.textField.minimumFontSize = FXFormLabelMinFontSize(self.textLabel);
     self.textField.textColor = [UIColor colorWithRed:0.275f green:0.376f blue:0.522f alpha:1.000f];
+    self.textField.textAlignment = NSTextAlignmentRight;
     self.textField.delegate = self;
     [self.contentView addSubview:self.textField];
     
@@ -1863,8 +1864,19 @@ static BOOL *FXFormSetValueForKey(id<FXForm> form, id value, NSString *key)
 	textFieldFrame.size.width = self.textField.superview.frame.size.width - textFieldFrame.origin.x - FXFormFieldPaddingRight;
 	if (![self.textLabel.text length])
     {
-		textFieldFrame.origin.x = FXFormFieldPaddingLeft;
-		textFieldFrame.size.width = self.contentView.bounds.size.width - FXFormFieldPaddingLeft - FXFormFieldPaddingRight;
+        // Nothing in the text label, look for an image
+        if (!self.imageView || !self.imageView.image)
+        {
+            // No image, just pad it
+            textFieldFrame.origin.x = FXFormFieldPaddingLeft;
+            textFieldFrame.size.width = self.contentView.bounds.size.width - FXFormFieldPaddingLeft - FXFormFieldPaddingRight;
+        }
+        else
+        {
+            // Got an image, pad from the image view
+            textFieldFrame.origin.x = CGRectGetMaxX(self.imageView.frame) + FXFormFieldLabelSpacing;
+            textFieldFrame.size.width = self.imageView.superview.frame.size.width - textFieldFrame.origin.x - FXFormFieldPaddingRight;
+        }
 	}
     else if (self.textField.textAlignment == NSTextAlignmentRight)
     {
@@ -1881,7 +1893,6 @@ static BOOL *FXFormSetValueForKey(id<FXForm> form, id value, NSString *key)
     self.textField.text = [self.field fieldDescription];
     
     self.textField.returnKeyType = UIReturnKeyDone;
-    self.textField.textAlignment = NSTextAlignmentRight;
     self.textField.secureTextEntry = NO;
     
     if ([self.field.type isEqualToString:FXFormFieldTypeText])
